@@ -159,6 +159,26 @@ export const updateSlideNotesTool = async (slides: slides_v1.Slides, args: Updat
             isError: true,
           };
         }
+        // Validate bounds
+        if (args.insertionIndex < 0 || args.insertionIndex > notesShape.textLength) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(
+                  {
+                    success: false,
+                    error: `insertionIndex must be between 0 and ${notesShape.textLength} (current text length), got ${args.insertionIndex}`,
+                    currentTextLength: notesShape.textLength,
+                  },
+                  null,
+                  2
+                ),
+              },
+            ],
+            isError: true,
+          };
+        }
         if (args.notes.trim()) {
           requests.push({
             insertText: {
@@ -181,6 +201,30 @@ export const updateSlideNotesTool = async (slides: slides_v1.Slides, args: Updat
                   {
                     success: false,
                     error: 'deleteStartIndex and deleteEndIndex are required for delete operation',
+                  },
+                  null,
+                  2
+                ),
+              },
+            ],
+            isError: true,
+          };
+        }
+        // Validate bounds
+        if (
+          args.deleteStartIndex < 0 ||
+          args.deleteEndIndex > notesShape.textLength ||
+          args.deleteStartIndex >= args.deleteEndIndex
+        ) {
+          return {
+            content: [
+              {
+                type: 'text',
+                text: JSON.stringify(
+                  {
+                    success: false,
+                    error: `Invalid delete range: startIndex must be >= 0, endIndex must be <= ${notesShape.textLength}, and startIndex < endIndex. Got start=${args.deleteStartIndex}, end=${args.deleteEndIndex}`,
+                    currentTextLength: notesShape.textLength,
                   },
                   null,
                   2

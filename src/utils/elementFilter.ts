@@ -62,28 +62,20 @@ export const filterPageElements = (
     .map((element) => {
       // If it's a group, keep the group but filter its children
       if (element.elementGroup?.children) {
+        const originalChildCount = element.elementGroup.children.length;
         const filteredChildren = filterPageElements(element.elementGroup.children);
-        // Only keep the group if it has children after filtering
-        if (filteredChildren.length === 0) {
-          return {
-            ...element,
-            elementGroup: {
-              ...element.elementGroup,
-              children: [
-                {
-                  objectId: 'filtered',
-                  description: `${element.elementGroup.children.length} small decorative elements filtered`,
-                },
-              ],
-            },
-          };
-        }
+
+        // Keep the group with filtered children (may be empty)
         return {
           ...element,
           elementGroup: {
             ...element.elementGroup,
             children: filteredChildren,
           },
+          // Add metadata about filtering if elements were removed
+          ...(filteredChildren.length < originalChildCount && {
+            description: `${element.description || 'Group'} (${originalChildCount - filteredChildren.length} decorative elements filtered)`,
+          }),
         };
       }
 
